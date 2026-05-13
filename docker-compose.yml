@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    ports:
+      - "${BACKEND_PORT:-8081}:8081"
+    networks:
+      - dev-network
+
+  frontend-dev:
+    build:
+      context: ./frontend
+      target: dev
+    image: momo-frontend:dev
+    profiles:
+      - dev
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - VUE_APP_API_URL=http://backend:8081
+      - BASE_URL=/
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - dev-network
+    healthcheck:
+      disable: true
+
+networks:
+  dev-network:
+    driver: bridge
