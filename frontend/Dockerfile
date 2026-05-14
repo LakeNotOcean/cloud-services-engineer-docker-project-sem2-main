@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:26-alpine AS base
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ RUN npm ci && npm cache clean --force
 
 FROM base AS dev
 
-ARG VUE_APP_API_URL=http://localhost:8000
+ARG VUE_APP_API_URL=http://localhost:8081
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
 ARG BASE_URL=/
 ENV BASE_URL=$BASE_URL
@@ -22,7 +22,7 @@ CMD ["npm", "run", "serve", "--", "--host", "0.0.0.0"]
 
 FROM base AS builder
 
-ARG VUE_APP_API_URL=http://localhost:8000
+ARG VUE_APP_API_URL=http://localhost:8081
 ENV VUE_APP_API_URL=$VUE_APP_API_URL
 ARG BASE_URL=/
 ENV BASE_URL=$BASE_URL
