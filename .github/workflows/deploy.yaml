@@ -47,7 +47,7 @@ jobs:
   vulnerability-scan:
     name: Scan ${{ matrix.image }}
     runs-on: ubuntu-latest
-    needs: run-with-docker-compose  
+    needs: [build_and_push_to_docker_hub, run-with-docker-compose]
     strategy:
       fail-fast: false
       matrix:
