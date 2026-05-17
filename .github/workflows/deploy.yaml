@@ -47,7 +47,7 @@ jobs:
   generate-image-list:
     name: Generate list of images
     runs-on: ubuntu-latest
-    needs: build_and_push_to_docker_hub
+    needs: run-with-docker-compose
     outputs:
       images: ${{ steps.list.outputs.images }}
     steps:
