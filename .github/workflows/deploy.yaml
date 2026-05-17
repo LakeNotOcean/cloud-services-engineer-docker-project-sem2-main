@@ -43,7 +43,7 @@ jobs:
       - name: Build via Docker Compose
         uses: hoverkraft-tech/compose-action@v2.2.0
         with:
-          services-log-level: "debug" 
+          services-log-level: info 
 
   # сборка всех исользуемых образов
   generate-image-list:
