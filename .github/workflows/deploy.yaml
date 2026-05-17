@@ -43,45 +43,43 @@ jobs:
       - name: Build via Docker Compose
         uses: hoverkraft-tech/compose-action@v2.2.0
 
-  # сборка всех исользуемых образов
-  generate-image-list:
-    name: Generate list of images
-    runs-on: ubuntu-latest
-    needs: run-with-docker-compose
-    outputs:
-      images: ${{ steps.list.outputs.images }}
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-      - name: Create compose file and extract images
-        id: list
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USER }}
-        run: |
-          IMAGES=$(docker compose -f docker-compose.yml --profile prod config | \
-                  yq e '.services[].image' - | sort -u | jq -R -s -c 'split("\n")[:-1]')
-          echo "images=$IMAGES" >> $GITHUB_OUTPUT
-
   # сканирование полученных образов
   vulnerability-scan:
     name: Scan ${{ matrix.image }}
     runs-on: ubuntu-latest
-    needs: generate-image-list
+    needs: run-with-docker-compose  
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.generate-image-list.outputs.images) }}
+        image:
+          - nginxinc/nginx-unprivileged:1.29.8-alpine   
+          - backend                                       
+          - frontend
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Resolve full image name for custom images
+        id: resolve
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USER }}
+        run: |
+          # Подставновка имени пользователя из секрета для созданных образов
+          if [[ "${{ matrix.image }}" == "backend" ]]; then
+            FULL_IMAGE="$DOCKER_USERNAME/docker-project-backend:latest"
+          elif [[ "${{ matrix.image }}" == "frontend" ]]; then
+            FULL_IMAGE="$DOCKER_USERNAME/docker-project-frontend:latest"
+          else
+            FULL_IMAGE="${{ matrix.image }}"
+          fi
+          echo "full_image=$FULL_IMAGE" >> $GITHUB_OUTPUT
 
-      - name: Scan ${{ matrix.image }} with Trivy
+      - name: Scan with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ matrix.image }}
+          image-ref: ${{ steps.resolve.outputs.full_image }}
           format: 'table'
           exit-code: '1'
           vuln-type: 'os,library'
