@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: ${DOCKER_USERNAME:-dockeruser}/docker-project-backend:latest
+    image: ${DOCKER_USERNAME:-lakenotocean}/docker-project-backend:latest
     build: ./backend
     container_name: backend
     profiles:
@@ -38,7 +38,7 @@ services:
     secrets:
       - useless-secret
   frontend:
-    image: ${DOCKER_USERNAME:-dockeruser}/docker-project-frontend:latest
+    image: ${DOCKER_USERNAME:-lakenotocean}/docker-project-frontend:latest
     build:
       context: ./frontend
       target: prod
