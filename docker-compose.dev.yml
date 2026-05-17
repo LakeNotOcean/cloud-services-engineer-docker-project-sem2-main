@@ -4,29 +4,41 @@ services:
   backend:
     ports:
       - "${BACKEND_PORT:-8081}:8081"
+    profiles:
+      - dev
     networks:
       - dev-network
+    deploy:
+      resources:
+        limits: {}        
+        reservations: {}  
 
-  frontend-dev:
+  frontend:
     build:
       context: ./frontend
       target: dev
+    container_name: frontend
     profiles:
       - dev
     ports:
       - "8080:8080"
     environment:
       - NODE_ENV=development
-      - VUE_APP_API_URL=http://backend:8081
-      - BASE_URL=/  
+      - VUE_APP_API_URL=http://localhost:8081
+      - BASE_URL=/ 
+      - NODE_OPTIONS=--openssl-legacy-provider 
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    restart: unless-stopped
     networks:
       - dev-network
     healthcheck:
       disable: true
+    deploy:
+      replicas: 1 
+      resources:
+        limits: {}        
+        reservations: {}  
 
 networks:
   dev-network:

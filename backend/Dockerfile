@@ -1,5 +1,7 @@
+# сборка Golang приложения
 FROM golang:1.26-alpine AS builder
 
+# установка git (может потребоваться)
 RUN apk add --no-cache git ca-certificates
 
 WORKDIR /app
@@ -13,7 +15,7 @@ ARG TARGETARCH=amd64
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -ldflags="-w -s" -o /api ./cmd/api
 
-# Финальный этап
+# финальный этап,запуск основного приложения 
 FROM alpine:3.22.4
 
 RUN apk add --no-cache wget
@@ -23,7 +25,9 @@ LABEL maintainer="ch3shirsins@yandex.ru" \
     version="1.0.0" \
     security.capabilities="minimal"
 
+# запуск от пользователя appuser
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --chown=appuser:appgroup --from=builder /api /api
 
