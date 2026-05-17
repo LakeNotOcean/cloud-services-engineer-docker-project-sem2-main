@@ -58,7 +58,7 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USER }}
         run: |
-          IMAGES=$(docker compose -f docker-compose.yml config | \
+          IMAGES=$(docker compose -f docker-compose.yml --profile prod config | \
                   yq e '.services[].image' - | sort -u | jq -R -s -c 'split("\n")[:-1]')
           echo "images=$IMAGES" >> $GITHUB_OUTPUT
 
